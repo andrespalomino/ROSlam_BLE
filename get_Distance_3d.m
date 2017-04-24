@@ -64,6 +64,7 @@ function [z, angle_alfa, angle_beta,angle_gamma] = get_Distance_3d(pos, landmark
 % RSSI dB en funcion de Distancia
 Y_dB = -58.455 -10*(3.3687)*log10(d_real) + normrnd(0, observation_variance(1)); 
 
+
 % Distance mts en funcion de RSSI dB
 d_measured = 0.0186*exp(-0.068 * Y_dB); 
 

@@ -1,5 +1,9 @@
   %% RESULTS
 
+  
+  
+  
+  
 
 for wIdx = 1:number_of_robots    
     robots(wIdx).EMC_x = [];
@@ -29,8 +33,8 @@ EMC_Z = [];
 
 EV_T = [];
 
-
-for wIdx = 1:number_of_robots
+wIdx = 1;
+% for wIdx = 1:number_of_robots
     figure(510+wIdx)    
     hold on;
     
@@ -56,23 +60,23 @@ for wIdx = 1:number_of_robots
         
         % Show Estimated position relative to robot wIdx
         
-        for cont = 1 : number_of_robots-1
-            if cont >= wIdx
-                plot3(robots(wIdx).pose_est_double(cont,x_data), robots(wIdx).pose_est_double(cont,y_data),...
-                    robots(wIdx).pose_est_double(cont,z_data), 'o','Markersize', 10,'LineWidth',1.5,'Color',color_2(cont+1,:));
-                
-                plot3(robots(wIdx).pose_est_double(cont,x_data_2), robots(wIdx).pose_est_double(cont,y_data_2),...
-                    robots(wIdx).pose_est_double(cont,z_data_2), 'o','Markersize', 10,'LineWidth',1.5,'Color',color_2(cont+1,:));
-            else
-                plot3(robots(wIdx).pose_est_double(cont,x_data), robots(wIdx).pose_est_double(cont,y_data),...
-                    robots(wIdx).pose_est_double(cont,z_data), 'o','Markersize', 10,'LineWidth',1.5,'Color',color_2(cont,:));
+%         for cont = 1 : number_of_robots-1
+%             if cont >= wIdx
+%                 plot3(robots(wIdx).pose_est_double(cont,x_data), robots(wIdx).pose_est_double(cont,y_data),...
+%                     robots(wIdx).pose_est_double(cont,z_data), 'o','Markersize', 10,'LineWidth',1.5,'Color',color_2(cont+1,:));
 %                 
-                plot3(robots(wIdx).pose_est_double(cont,x_data_2), robots(wIdx).pose_est_double(cont,y_data_2),...
-                    robots(wIdx).pose_est_double(cont,z_data_2), 'o','Markersize', 10,'LineWidth',1.5,'Color',color_2(cont,:));
-            end
-            %             uIdx
-            %             pause
-        end
+%                 plot3(robots(wIdx).pose_est_double(cont,x_data_2), robots(wIdx).pose_est_double(cont,y_data_2),...
+%                     robots(wIdx).pose_est_double(cont,z_data_2), 'o','Markersize', 10,'LineWidth',1.5,'Color',color_2(cont+1,:));
+%             else
+%                 plot3(robots(wIdx).pose_est_double(cont,x_data), robots(wIdx).pose_est_double(cont,y_data),...
+%                     robots(wIdx).pose_est_double(cont,z_data), 'o','Markersize', 10,'LineWidth',1.5,'Color',color_2(cont,:));
+% %                 
+%                 plot3(robots(wIdx).pose_est_double(cont,x_data_2), robots(wIdx).pose_est_double(cont,y_data_2),...
+%                     robots(wIdx).pose_est_double(cont,z_data_2), 'o','Markersize', 10,'LineWidth',1.5,'Color',color_2(cont,:));
+%             end
+%             %             uIdx
+%                         pause
+%         end
         
 
         
@@ -317,7 +321,7 @@ for wIdx = 1:number_of_robots
     
 %     text( 0, 0, sprintf( ' MSE estimacion = %f', ECM_d_estimacion_v),   'BackgroundColor',[1  .6 .6]);
     
-end
+% end
 
 %%
 %%%%%%%%%%%%%%%%%%%%%% 
@@ -328,37 +332,40 @@ end
     fig4 = 910;
     fig5 = 1000;
     fig6 = 1100;
-    n_points_estimated = timesteps/(inc*number_of_robots)
+    number_of_robots = 3;
+    n_points_estimated = 8;
+    
+%     n_points_estimated = timesteps/(inc*number_of_robots)
 
-
+wIdx = 1;
 
 t_est_r = [];
-for wIdx = 1 : number_of_robots
+% for wIdx = 1 : number_of_robots
 %     uIdx = 
     for uIdx = 1 : number_of_robots-1
 
          %%%%%%%%%%%
         %   error vs time
-        %%%% ERRROES 2D
-%         figure(fig3+wIdx)
-%         
-%         set(gca,'FontSize',11); set(gcf,'Color','White');
-%         subplot(2,1,1)
-%         
-%         
-%         t_est_r(:,wIdx) = (0:n_points_estimated-1)*inc*number_of_robots + inc*(wIdx);   % Tiempos en que estima robot
-%         
-%         plot(t_est_r(:,wIdx),robots(wIdx).EMC_x(uIdx,:),'-*')
-% %         title(['Error de estimación Robot ',num2str(wIdx)]);
-%         ylabel('Distancia (m)')
-%         hold on
-%         title('Error Posicion X')
-%         subplot(2,1,2)
-%         plot(t_est_r(:,wIdx),robots(wIdx).EMC_y(uIdx,:),'-*')
-%         ylabel('Distancia (m)')
-%         hold on
-%         title('Error Posicion Y')
-%         xlabel('Time')
+        %%% ERRROES 2D
+        figure(fig3+wIdx)
+        
+        set(gca,'FontSize',11); set(gcf,'Color','White');
+        subplot(2,1,1)
+        
+        
+        t_est_r(:,wIdx) = (0:n_points_estimated-1)*inc*number_of_robots + inc*(wIdx);   % Tiempos en que estima robot
+        
+        plot(t_est_r(:,wIdx),robots(wIdx).EMC_x(uIdx,:),'-*')
+%         title(['Error de estimación Robot ',num2str(wIdx)]);
+        ylabel('Distancia (m)')
+        hold on
+        title('Error Posicion X')
+        subplot(2,1,2)
+        plot(t_est_r(:,wIdx),robots(wIdx).EMC_y(uIdx,:),'-*')
+        ylabel('Distancia (m)')
+        hold on
+        title('Error Posicion Y')
+        xlabel('Time')
         
         
         %%%% ERRROES 3D
@@ -424,4 +431,4 @@ for wIdx = 1 : number_of_robots
         %%%%%%%%%%%%%%%%%%%%%%%%
 %         pause
     end
-end
+% end

@@ -29,8 +29,8 @@ EMC_Z = [];
 
 EV_T = [];
 
-
-for wIdx = 1:number_of_robots
+wIdx = 1;
+% for wIdx = 1:number_of_robots
     figure(510+wIdx)    
     hold on;
     
@@ -317,7 +317,7 @@ for wIdx = 1:number_of_robots
     
 %     text( 0, 0, sprintf( ' MSE estimacion = %f', ECM_d_estimacion_v),   'BackgroundColor',[1  .6 .6]);
     
-end
+% end
 
 %%
 %%%%%%%%%%%%%%%%%%%%%% 
@@ -328,12 +328,14 @@ end
     fig4 = 910;
     fig5 = 1000;
     fig6 = 1100;
+    n_points_estimated = 8;
+    
     n_points_estimated = timesteps/(inc*number_of_robots)
 
-
+wIdx = 1;
 
 t_est_r = [];
-for wIdx = 1 : number_of_robots
+% for wIdx = 1 : number_of_robots
 %     uIdx = 
     for uIdx = 1 : number_of_robots-1
 
@@ -422,6 +424,6 @@ for wIdx = 1 : number_of_robots
                 title('Error Posicion Y')
                 xlabel('Time')
         %%%%%%%%%%%%%%%%%%%%%%%%
-%         pause
+        pause
     end
-end
+% end

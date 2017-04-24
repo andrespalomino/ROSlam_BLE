@@ -1,4 +1,4 @@
-%%%% Estimaciòn intermedia 
+%%%% Estimaciòn K - 1 
 
 %%%%%%%%%%%%%%%%%%%%%%
           % EStimation before round K to check consistency and avoid flip
