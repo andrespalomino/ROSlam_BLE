@@ -58,25 +58,25 @@ wIdx = 1;
         y_data_2 = uIdx+4;
         z_data_2 = uIdx+5;
         
-        % Show Estimated position relative to robot wIdx
+        Show Estimated position relative to robot wIdx
         
-%         for cont = 1 : number_of_robots-1
-%             if cont >= wIdx
-%                 plot3(robots(wIdx).pose_est_double(cont,x_data), robots(wIdx).pose_est_double(cont,y_data),...
-%                     robots(wIdx).pose_est_double(cont,z_data), 'o','Markersize', 10,'LineWidth',1.5,'Color',color_2(cont+1,:));
+        for cont = 1 : number_of_robots-1
+            if cont >= wIdx
+                plot3(robots(wIdx).pose_est_double(cont,x_data), robots(wIdx).pose_est_double(cont,y_data),...
+                    robots(wIdx).pose_est_double(cont,z_data), 'o','Markersize', 10,'LineWidth',1.5,'Color',color_2(cont+1,:));
+                
+                plot3(robots(wIdx).pose_est_double(cont,x_data_2), robots(wIdx).pose_est_double(cont,y_data_2),...
+                    robots(wIdx).pose_est_double(cont,z_data_2), 'o','Markersize', 10,'LineWidth',1.5,'Color',color_2(cont+1,:));
+            else
+                plot3(robots(wIdx).pose_est_double(cont,x_data), robots(wIdx).pose_est_double(cont,y_data),...
+                    robots(wIdx).pose_est_double(cont,z_data), 'o','Markersize', 10,'LineWidth',1.5,'Color',color_2(cont,:));
 %                 
-%                 plot3(robots(wIdx).pose_est_double(cont,x_data_2), robots(wIdx).pose_est_double(cont,y_data_2),...
-%                     robots(wIdx).pose_est_double(cont,z_data_2), 'o','Markersize', 10,'LineWidth',1.5,'Color',color_2(cont+1,:));
-%             else
-%                 plot3(robots(wIdx).pose_est_double(cont,x_data), robots(wIdx).pose_est_double(cont,y_data),...
-%                     robots(wIdx).pose_est_double(cont,z_data), 'o','Markersize', 10,'LineWidth',1.5,'Color',color_2(cont,:));
-% %                 
-%                 plot3(robots(wIdx).pose_est_double(cont,x_data_2), robots(wIdx).pose_est_double(cont,y_data_2),...
-%                     robots(wIdx).pose_est_double(cont,z_data_2), 'o','Markersize', 10,'LineWidth',1.5,'Color',color_2(cont,:));
-%             end
-%             %             uIdx
-%                         pause
-%         end
+                plot3(robots(wIdx).pose_est_double(cont,x_data_2), robots(wIdx).pose_est_double(cont,y_data_2),...
+                    robots(wIdx).pose_est_double(cont,z_data_2), 'o','Markersize', 10,'LineWidth',1.5,'Color',color_2(cont,:));
+            end
+            %             uIdx
+                        pause
+        end
         
 
         
