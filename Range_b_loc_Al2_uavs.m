@@ -3,7 +3,7 @@
 
 % LOOP
 
-% v_sigma = [0 0.05 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8]
+v_sigma = [0 0.05 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8]
 % for sigma = 5:length(v_sigma)
     
 
@@ -25,132 +25,210 @@
 close all
 % clc
 
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % PARAMETERS
+error_resolve = 0.4
 
+% Max 1.5 BLE noise
+% sigma_d = v_sigma(sigma)
+sigma_d = 0.02
+sigma_z = 0.02
+
+measurement_variance_z = normrnd(0, sigma_z); 
+
+odometry_noise = 0;   
+
+% v_sigma = [0 0.001 0.002 0.005 0.01 0.015 0.02 0.03 0.05]
 
 % Number of Robots
-number_of_robots = 3;
+number_of_robots = 5;
+
+% The number of timesteps for the simulation
+timesteps = 80;
+
+% The Gaussian variance of our sensor readings
+measurement_variance = [sigma_d;
+                        0;
+                        0];   % Distance_x
+
+% The maximum distance from which our sensor can sense a landmark or other
+% robot
+max_read_distance = 80;
+
+color = [1 0 0;0 0 1; 0 1 1; [127 198 78]/255]; 
+color_1 = [1 0 0;0 0 1;
+    [65 176 135]/255;
+    [153 0 153]/255;
+    [255 105 0]/255;
+    [140 205 96]/255;    
+    [131 156 159]/255;
+    [204 0 153]/255];
+    
+% color_2 = [[251 128 105]/255;[78 179 211]/255; [140 205 96]/255; [204 0 153]/255]; 
+
+color_2 = [[251 128 105]/255;[78 179 211]/255; [140 205 96]/255; [204 0 153]/255; [0.3756 0.7007 0.3032]]; 
+% color_1 = color_2;
+color_1 = color_1
+color_2 = color_1
+
+% color = [1 0 0;0 0 1; 0.6135 0.7261 0.2074; 0.9386 0.0713 0.3635]; 
+
+% round to take odometry and plot
+inc = 4;
+count_round = 4;
+count_round_flip = 2; 
+% count_round_flip_2 = count_round_flip + 2;
+
+% % round to take odometry and plot
+% inc = 5;
+% count_round = 5;
+% count_round_flip = 2; 
+
+count_round_plot = count_round;
+
+% Take odometry every 3 rounds 
+flag_round = 0;
+
+% Rounds to apply algorithm 
+j = 1;
+
+% break
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% ROBOT U
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% The initial starting position of the robot
+real_position = [0;      % x
+                0;     % y
+                 0];  % rotation
+                                     
+% The movement command given to he robot at each timestep                 
+movement_command = [0;     % Distance
+                    0];    % Rotation      
+                
+% The Gaussian variance of the movement commands
+movement_variance = [0;   % Distance
+                     0]; % Rotation
+Q = [movement_variance(1), 0.0;
+     0.0, movement_variance(2)];
+                 
+R = [measurement_variance(1), 0.0, 0.0;
+     0.0, measurement_variance(2), 0.0;
+     0.0, 0.0, measurement_variance(3)];
+                
+             
+  robot_u.position = real_position;
+  robot_u.pos_hist = [real_position];  
+  robot_u.odometry = [];
+  robot_u.odometry_hist = [];
+  robot_u.pos_est = [];
+  
+% Create the robots and initialize them all to be in the same initial
+% position. 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% ROBOTS W
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% RANDOM
+% a = -10;
+% b = 10;
+% for i = 1:number_of_robots
+%     rx = a + (b-a)*rand;
+%     ry = a + (b-a)*rand;
+%     rt = a + (b-a)*rand;
+%     robots(i).position = [rx; ry; rt];
+%     robots(i).pos_hist = robots(i).position;
+% end
 
 
+% FIXED
+% The initial starting position of the robot
+real_position_w1 = [0;      % x
+                 0;     % y
+                 3];     %z
+                   % rotation
+                   
+% initial euler angles phi,theta,psi
+real_angle_w1 = [0,0,0];
+T = R_euler(real_angle_w1(1),real_angle_w1(2),real_angle_w1(3),0);
+MT = [[T,real_position_w1];[0 0 0 1]];
+robots(1).MT = MT;
+
+% The initial starting position of the robot
+real_position_w2 = [1;      % x
+                0.5;     % y
+                2.5];      % z
+                  % rotation
+                  
+% % The initial starting position of the robot
+% real_position_w2 = [-0.5;      % x
+%                 0;     % y
+%                 3];      % z
+%                   % rotation
+                  
+% initial euler angles phi,theta,psi
+real_angle_w2 = [0,0,0];
+T = R_euler(real_angle_w2(1),real_angle_w2(2),real_angle_w2(3),0);
+MT = [[T,real_position_w2];[0 0 0 1]];
+robots(2).MT = MT;
+
+% The initial starting position of the robot
+real_position_w3 = [2;      % x
+                 1;     % y
+                 2];     % z
+                   % rotation
+                   
+%                    % The initial starting position of the robot
+% real_position_w3 = [0;      % x
+%                  0.5;     % y
+%                  3];     % z
+%                    % rotation
+                   
+% initial euler angles phi,theta,psi
+real_angle_w3 = [0,0,0];  
+T = R_euler(real_angle_w3(1),real_angle_w3(2),real_angle_w3(3),0);
+MT = [[T,real_position_w3];[0 0 0 1]];
+robots(3).MT = MT;
+             
+% The initial starting position of the robot
+real_position_w4 = [3;      % x
+                1;     % y
+                2];      %z
+                  % rotation
+                  
+%                   % The initial starting position of the robot
+% real_position_w4 = [-0.5;      % x
+%                 0.5;     % y
+%                 3];      %z
+%                   % rotation
+                  
+% initial euler angles phi,theta,psi
+real_angle_w4 = [0,0,0];   
+T = R_euler(real_angle_w4(1),real_angle_w4(2),real_angle_w4(3),0);
+MT = [[T,real_position_w4];[0 0 0 1]];
+robots(4).MT = MT;
+
+                 
+movement_command2 = [0.1;   % Distance x
+                     0.1;   % Distance y
+                     0;   % Distance z
+                     0.0;   % phi
+                     0.0;   % theta
+                     0];    % psi        
+                 
+              
+                 
+                 
 %%%%% INITIAL POSE
 % The initial starting position of the robot
-robots(1).position = [0;     % x
-                      0;     % y
-                      0];    % z
-                  
-robots(2).position = [-2;     % x
-                      0;     % y
-                      0];    % z
-                  
-robots(3).position = [2;    % x
-                      0;     % y
-                      0];    % z     
-
-% Odometria y trayectos reales                
-position_1 = [0 0 0; 
-              0 1.5 0; 
-              1.2 1.5 0; 
-              1.2 0 0;
-              1.2 -1.5 0;
-              0 -1.5 0;
-              -1.2 -1.5 0;
-              -1.2 0 0;
-              -1.2 1.5 0];
-
-odometry_1 = [0 1.5 0;
-            1.2 0 0;
-            0 -1.5 0;
-            0 -1.5 0;
-            -1.2 0 0;
-            -1.2 0 0;
-            0 1.5 0;
-            0 1.5 0;
-            0 1.5 0];
-          
-% odometry_1 = [1.5;1.2;1.5          
-
-robots(1).state = 1; %Solo movimiento de 1
-
-% robots(1).pos_flip(uIdx,:) = [x_estimado,y_estimado,x_estimado_2,y_estimado_2]
-robots(1).pos_flip = [0 0 0 0;-2 0 -2 0;2 0 2 0];
-robots(2).pos_flip = [0 0 0 0;-2 0 -2 0;2 0 2 0];
-robots(3).pos_flip = [0 0 0 0;-2 0 -2 0;2 0 2 0];
-
-pos_inicial = [0 0 0 0;-2 0 -2 0;2 0 2 0];
-% REAL DATA Mts
-data_real = [2,2;
-             2.5,2.5;
-             3.5341, 1.7;
-             3.2, 0.8;
-             3.5341, 1.7;
-             2.5,2.5;
-             1.7, 3.5341;
-             0.8, 3.2;
-             1.7,3.5341]; 
-         
-% Experimental data RSSI from A and B
-data = -[(93+94+92+94)/4 , 92;
-        (87+88+87+87)/4, (87+86+86+86)/4;
-         88, (77+82+84+84)/4;
-        (89+93+93+93+92)/5,(80+80+75+77+77)/5;
-        (85+85+81+81+81)/5,(81+89+72+89+90+90)/6;
-        (74+74+72+76)/4, (72+72+71+72)/4;
-        (86+91+90+90+90+89)/6,(79+79+80+86+86+86)/6;
-        (81+81+83+83+88)/5,(73+73+92+91+92)/5;
-        (89+89+88+81+81)/5,(82+82+92+92+92)/5;];
-
-   
-    
-%1) Distance mts en funcion de RSSI dB 
-% d_measured = 0.0186*exp(-0.068 * Y_dB);    
-
-%2) Distance mts en funcion de RSSI dB 
-% d_measured = 0.011 *exp(-0.07 * Y_dB);  
-
-%3) Distance mts en funcion de RSSI dB 
-% d_measured = 0.008 *exp(-0.069 * Y_dB);
-
-data1 = 0.011 *exp(-0.07 * data)
-data2 = 0.0186*exp(-0.068 * data)
-data3 = 0.005*exp(-0.068 * -88)
-
-% data = data3;
-data = data3;
-% data = data_real;    
-
-data(1,:) = [2,2];   % distancias iniciales
-data(2,:) = [2.5,2.5];   % distancias iniciales
-
-% Direcciones del movieminto
-epsi = [90*pi/180;
-        0;
-        -90*pi/180;
-        -90*pi/180;
-        180*pi/180;
-        180*pi/180;
-        90*pi/180;
-        90*pi/180];       
-
-    % Distancia recorrida en movimiento
-L = [1.5;1.2;1.5;1.5;1.2;1.2;1.5;1.5;1.5];                
-               
-    
-break
-
- % Flag para usar la medida de data en el modelo
-data_BLE = 1;
 
 for n=1:number_of_robots
     
-%     Iniialize Random pos
+%     Random pos 0 - 5
 %     robots(n).position =  (6*rand(1,3)-3)';
-
-
 %     Fixed pos
-%     robots(n).position =  [n,n,n]';
+    robots(n).position =  [n,n,n]';
     
     robots(n).pos_hist = robots(n).position;
     robots(n).pos_hist_all = robots(n).position;
@@ -168,78 +246,23 @@ for n=1:number_of_robots
 end
 %%%--------------------------------
 
-error_resolve = 0.4
 
-% Max 1.5 BLE noise
-% sigma_d = v_sigma(sigma)
-sigma_d = 0
-sigma_z = 0;
-
-measurement_variance_z = normrnd(0, sigma_z); 
-
-odometry_noise = 0;   
-
-% The number of timesteps for the simulation
-timesteps = 80;
-
-% The Gaussian variance of our sensor readings
-measurement_variance = [sigma_d;
-                        0;
-                        0];   % Distance_x
-                    
-% The Gaussian variance of the movement commands
-movement_variance = [0;   % Distance
-                     0]; % Rotation                    
-
-% The maximum distance from which our sensor can sense a landmark or other
-% robot
-max_read_distance = 80;
-
-color = [1 0 0;0 0 1; 0 1 1; [127 198 78]/255]; 
-color_1 = [1 0 0;0 0 1;
-    [65 176 135]/255;
-    [153 0 153]/255;
-    [140 205 96]/255;
-    [204 0 153]/255;
-    [0.3756 0.7007 0.3032]]; 
-% color_2 = [[251 128 105]/255;[78 179 211]/255; [140 205 96]/255; [204 0 153]/255]; 
-
-color_2 = [[251 128 105]/255;[78 179 211]/255; [140 205 96]/255; [204 0 153]/255; [0.3756 0.7007 0.3032]]; 
-% color_1 = color_2;
-color_1 = color_1;
-color_2 = color_1;
-
-% color = [1 0 0;0 0 1; 0.6135 0.7261 0.2074; 0.9386 0.0713 0.3635]; 
-
-% round to take odometry and plot
-inc = 10;
-count_round = 10;
-count_round_flip = 5; 
-% count_round_flip_2 = count_round_flip + 2;
-
-% % round to take odometry and plot
-% inc = 5;
-% count_round = 5;
-% count_round_flip = 2; 
-
-count_round_plot = count_round;
-
-% Take odometry every 3 rounds 
-flag_round = 0;
-
-% Rounds to apply algorithm 
-j = 1;
+                
+% robots(1).position = real_position_w1;
+% robots(2).position = real_position_w2;
+% robots(3).position = real_position_w3;
+% robots(4).position = real_position_w4;
+% robots(1).pos_hist = real_position_w1;
+% robots(2).pos_hist = real_position_w2;
+% robots(3).pos_hist = real_position_w3;
+% robots(4).pos_hist = real_position_w4;
+% 
+% robots(1).pos_hist_all = real_position_w1;
+% robots(2).pos_hist_all = real_position_w2;
+% robots(3).pos_hist_all = real_position_w3;
+% robots(4).pos_hist_all = real_position_w4;
 
 
-
-                 
-movement_command2 = [0.1;   % Distance x
-                     0.1;   % Distance y
-                     0;   % Distance z
-                     0.0;   % phi
-                     0.0;   % theta
-                     0];    % psi        
-                 
 
 % Initialize variables of each robot W
   for wIdx=1:number_of_robots
@@ -271,16 +294,13 @@ movement_command2 = [0.1;   % Distance x
 %     robots(wIdx).EMC_y = [];
 %     robots(wIdx).EMC_z = [];
 %     robots(wIdx).EMC_v = [];
-%     robots(wIdx).pos_flip = zeros(number_of_robots,4);
+    robots(wIdx).pos_flip = zeros(number_of_robots,4);
     robots(wIdx).theta_flip = zeros(number_of_robots,2);
     if wIdx == 1
         robots(wIdx).state = 1;
     else 
         robots(wIdx).state = 0;
     end
-    
-    
-    
   end
 
   
@@ -332,10 +352,7 @@ movement_command2 = [0.1;   % Distance x
   
 % Previous position  
 k_1 = aux_pk_1;
-n_data = 1;
-%               k_1_data = data(1,:);
-%               k_data   = data(2,:);
-              
+
 % pause
 
 % break
@@ -439,9 +456,8 @@ n_data = 1;
           % Execute program to estimate 2 solutions beforehand to later
           % compare for consistency
           
-%           flip_estimation;
-%          robots(wIdx).pos_flip(uIdx,:) = pos_ahora;
-%          pos_ahora
+          flip_estimation;
+         
 
           
       elseif round == count_round
@@ -456,7 +472,7 @@ n_data = 1;
             
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % K Estimation 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%   
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%          
 
 
           % Get Odometry real position and past position ROBOT W
@@ -468,14 +484,9 @@ n_data = 1;
               robots(wIdx).odometry =    get_Odometry_pos( ...
                   (robots(wIdx).position - robots(wIdx).pos_hist(:,1)), (k_1(:,wIdx) - robots(wIdx).pos_hist(:,1)), odometry_noise);              
               
-%               robots(wIdx).odometry = get_Odometry_pos( ...
-%                   (position_1(n_data,:)' - robots(wIdx).pos_hist(:,1)), (k_1(:,wIdx) - robots(wIdx).pos_hist(:,1)), odometry_noise); 
-              
               % Get measurement of altitud
               dreal_z_k_1 = k_1(3,wIdx);
-              dreal_z_k   = k_1(3,wIdx) + robots(wIdx).odometry(3); 
-              
-             
+              dreal_z_k   = k_1(3,wIdx) + robots(wIdx).odometry(3);  
               
               measurement_variance_z = normrnd(0, sigma_z); 
 
@@ -492,28 +503,6 @@ n_data = 1;
               
               robots(wIdx).epsi = atan2(robots(wIdx).odometry(2),robots(wIdx).odometry(1));
               
-              
-%               % Distancias recorridas
-%                       if round < 10
-%                           robots(wIdx).epsi = 90*pi/180;
-%                       elseif round >= 10 && round < 20
-%                           robots(wIdx).epsi = 90*pi/180;
-%                       elseif round >= 20 && round < 30
-%                           robots(wIdx).epsi = 0;
-%                       elseif round >= 30 && round < 40
-%                           robots(wIdx).epsi = -90*pi/180;
-%                       elseif round >= 40 && round < 50
-%                           robots(wIdx).epsi = -90*pi/180;
-%                       elseif round >= 50 && round < 60
-%                           robots(wIdx).epsi = 180*pi/180;
-%                       elseif round >= 60 && round < 70
-%                           robots(wIdx).epsi = 180*pi/180;
-%                       elseif round >= 70 && round < 80
-%                           robots(wIdx).epsi = 90*pi/180;
-%                       end
-
-%                elseif round >= 10 && round < 20
-         
 %               robots(wIdx).odometry_hist  = [robots(wIdx).odometry_hist, [robots(wIdx).odometry;robots(wIdx).epsi]];
               
               % inicialize var aux to calculate error
@@ -525,9 +514,6 @@ n_data = 1;
               pos_est = [];
               pos_meas = [];
               pos_est_double = [];
-              
-
-              
               for uIdx = 1: number_of_robots
                   %               Take a real (noisy) measurement (DISTANCE)
                   %               from the robot to the landmark
@@ -537,11 +523,7 @@ n_data = 1;
                   % if state = mobile then
                   if (robots(wIdx).state == 1) && (wIdx ~= uIdx)
                       
-                      % Get delta_z of altitud + noise
-                      robots(wIdx).epsi = epsi(n_data);
-                      ee = robots(wIdx).epsi
-                      robots(wIdx).odometry = odometry_1(n_data,:);
-                      
+                      % Get delta_z of altitud + noise                                            
                        
                       delta_z_k_1 = k_1(3,uIdx) - dreal_z_k_1 + measurement_variance_z;
                       
@@ -560,10 +542,8 @@ n_data = 1;
                       % Measurement Distance and angle K
 %                       [z_real, G] = get_Distance(robots(wIdx).position, real_landmark2, [0;0]);
                       [z_real,a_x,a_y,a_z] = get_Distance_3d(robots(wIdx).position, real_landmark2, [0,0]);
-                      sin_varianza = z_real;
+                      sin_varianza = z_real
                       [z_real,a_x,a_y,a_z] = get_Distance_3d(robots(wIdx).position, real_landmark2, measurement_variance);
-                      
-                      
                       
                       robots(wIdx).distk    = z_real;
                       con_varianza = z_real;
@@ -597,57 +577,13 @@ n_data = 1;
                       %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                       % % RELATIVE POSITION AND ORIENTATION ESTIMATION 
                       %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%                       dk = v_xy_k;
-% %                       robots(wIdx).dk = dk;
-%                       dk_1 = v_xy_k_1;
-                                            
-                      
-                      if data_BLE == 1
-                          if uIdx == 2
-                              % Distance mts en funcion de RSSI dB
-%                               d_measured = 0.0186*exp(-0.068 * Y_dB);
-                              dk = data(n_data+1,1)
-                              %                       robots(wIdx).dk = dk;
-                              dk_1 = data(n_data,1)
-%                               dk_1 = 2
-                          elseif uIdx == 3
-                              dk = data(n_data+1,2)
-                              %                       robots(wIdx).dk = dk;
-                              dk_1 = data(n_data,2)
-                          end
-%                           n_data
-%                           uIdx
-                          pause
-                      end
-                                                                  
-                      
-                      
+                      dk = v_xy_k;
+%                       robots(wIdx).dk = dk;
+                      dk_1 = v_xy_k_1;
                       %               dk_1 = robots(wIdx).distk_1;
                       %
-                      % Distancias recorridas
-%                       if round >1
-%                       if round <= 10
-%                           luk = 1.5;
-%                       elseif round > 10 && round <= 20
-%                           luk = 1.2;
-%                       elseif round > 20 && round <= 30
-%                           luk = 1.5;
-%                       elseif round > 30 && round <= 40
-%                           luk = 1.5;
-%                       elseif round > 40 && round <= 50
-%                           luk = 1.2;
-%                       elseif round > 50 && round <= 60
-%                           luk = 1.2;
-%                       elseif round > 60 && round <= 70
-%                           luk = 1.5;
-%                       elseif round > 70 && round <= 80
-%                           luk = 1.5;
-%                       end
-%                       end
-
-                      luk = L(n_data)
-                      pause
-
+                      luk = luk_xy;
+                      
                       robots(wIdx).beta = acos((luk^2 + dk^2 - dk_1^2)/(2*luk * dk));
                       
                       if (luk^2 + dk^2 - dk_1^2)/(2*luk * dk) < -1
@@ -693,13 +629,8 @@ n_data = 1;
 
                       %%%%%%%%%%%%%%%%%%%%%%%
                       pos_ahora = [x_estimado,y_estimado,x_estimado_2,y_estimado_2]
-%                       pos_ant = robots(wIdx).pos_flip(uIdx,:)
-                      pos_ant = robots(wIdx).pos_flip(uIdx,:)
+                      pos_ant = robots(wIdx).pos_flip(uIdx,:);
                       
-                      robots(wIdx).pos_flip(uIdx,:) = pos_ahora;
-                      pos_ahora_r = pos_ahora
-%                       pause
-%                       
                       % pos_dif should be near to previous pos
                       pos_dif = [robots(wIdx).odometry(1) + x_estimado, robots(wIdx).odometry(2) + y_estimado, robots(wIdx).odometry(1) + x_estimado_2,...
                           robots(wIdx).odometry(2) + y_estimado_2];
@@ -759,13 +690,12 @@ n_data = 1;
                       x_resolve = pos_resolve(1);
                       y_resolve = pos_resolve(2);
                       z_resolve = z_estimado;
-                      %                       z_resolve_double = z_estimado;
+%                       z_resolve_double = z_estimado;
                       
-                      robots(wIdx).position = position_1(n_data+1,:)';
                       
-                      % Pos estimada GLOBAL pos_resolve + robot_pos
-                      pos_resolve;
-                      pos_est = [pos_est; (robots(wIdx).position' + [x_resolve, y_resolve, z_resolve])];
+                      % Pos estimada GLOBAL pos_resolve + robot_pos 
+                      pos_resolve
+                      pos_est = [pos_est; (robots(wIdx).position' + [x_resolve, y_resolve, z_resolve])]
                       pos_est_double = [pos_est_double; (robots(wIdx).position' + ...
                           [x_resolve_double(1), y_resolve_double(1), z_resolve]),...
                           (robots(wIdx).position' + [x_resolve_double(2), y_resolve_double(2), z_resolve])]
@@ -852,11 +782,11 @@ n_data = 1;
                       %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                       % GRAFICAS DISTANCIA Y VECTORES ESTIMACION
                       %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-                      graficas_vec_3d;
-                      pause
+%                       graficas_vec_3d;
+%                       pause
                       %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-                      
+                     
 %                   else
 %                       
 %                       for wwIdx = 1:number_of_robots
@@ -867,7 +797,6 @@ n_data = 1;
 %                       end
                       
                   end 
-                  
               end
               
               
@@ -892,13 +821,9 @@ n_data = 1;
 %                   dist = robots(wIdx).read_distance;
               end
               
-              
-              
               % Actualizar Pk_1 y theta_uk_1_wk    %% ESTIMATION 
               k_1(:,wIdx) = robots(wIdx).position;
               robots(wIdx).MT_1 = robots(wIdx).MT;
-              
-
 %               robots(wIdx).distk_1 = aux;
 %               robots(1).pk_1(:,1) = robots(wIdx).position;
 %               robots(2).pk_1(:,1) = robots(wIdx).position;
@@ -943,24 +868,21 @@ n_data = 1;
           %------------------------------------------------------
           % state ? motion-scheduler
           %------------------------------------------------------
-%           for wIdx = 1:number_of_robots
-%               robots(wIdx).state = 0;
-%           end
-%           
-%           next = next +1;
-%           if next == number_of_robots + 1;
-%               next = 1;
-%           end
-%           robots(next).state = 1;
+          for wIdx = 1:number_of_robots
+              robots(wIdx).state = 0;
+          end
           
+          next = next +1;
+          if next == number_of_robots + 1;
+              next = 1;
+          end
+          robots(next).state = 1;
           
 
           
           
           % aumentar count_round para comparar
-          count_round = count_round + inc;
-          
-          n_data = n_data + 1;
+          count_round = count_round + inc
           
 %           pause
           
@@ -1074,32 +996,32 @@ n_data = 1;
 %       robot_u.pos_hist = [robot_u.pos_hist, robot_u.position];
       
 
+% k_1(:,wIdx) = robots(wIdx).position;
+
       % Move the W robots
       for wIdx = 1:number_of_robots    
           % if state = mobile
           if robots(wIdx).state == 1
               % Posicion x,y, rotacion de los robots W
-                  dtx = 0;  
-                  dty = 0;
-                  dtz = 0;
-                  psi = 0;
-                  
-              if round < 10
-                  dty = 0.15;
-              elseif round >= 10 && round < 20
-                  dtx = 0.12;
-              elseif round >= 20 && round < 30
-                  dty = -0.15;
-              elseif round >= 30 && round < 40
-                  dty = -0.15;
-              elseif round >= 40 && round < 50
-                  dtx = -0.12;                 
-              elseif round >= 50 && round < 60
-                  dtx = -0.12;
-              elseif round >= 60 && round < 70
-                  dty = 0.15;
-              elseif round >= 70 && round < 80
-                  dty = 0.15;
+              dtx = 0;
+              dty = 0.15;
+              dtz = 0.15;
+%               dtz = 0;
+              psi = 0.06;
+%               psi = 0;
+              
+%               dtx = rand * 0.2;
+%               dty = rand * 0.2;
+%               psi = rand * 0.2;
+              
+              if round < 20
+                  sent = -1;
+              elseif round >20 && round < 40
+                  sent = 1;
+              elseif round > 40 && round < 80
+                  sent = -1;
+              else
+                  sent = 1;
               end
               
 %               if round == 12
@@ -1133,8 +1055,6 @@ n_data = 1;
               
               movement_command2 = [dtx; dty; dtz; 0; 0; psi];
               
-              
-              
               [new_pos, new_rot] = moveParticle_3d( ...
                   robots(wIdx).position, robots(wIdx).MT(1:3,1:3), movement_command2, movement_variance);
               robots(wIdx).position = new_pos;
@@ -1157,9 +1077,7 @@ n_data = 1;
 %%%% RUN RESULTS & Save
 axis square
 % results;
-% results_v20;
-
-results_BLE_test;
+results_v20;
   
 % end
 
@@ -1171,7 +1089,6 @@ results_BLE_test;
 %% 
 %%%% SHOW SAVED RESULTS 
 % show_saved_data;
-
 
 
 

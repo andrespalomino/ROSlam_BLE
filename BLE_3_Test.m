@@ -80,7 +80,7 @@ robots(2).pos_flip = [0 0 0 0;-2 0 -2 0;2 0 2 0];
 robots(3).pos_flip = [0 0 0 0;-2 0 -2 0;2 0 2 0];
 
 pos_inicial = [0 0 0 0;-2 0 -2 0;2 0 2 0];
-% REAL DATA Mts
+% REAL DATA Distancias Mts 
 data_real = [2,2;
              2.5,2.5;
              3.5341, 1.7;
@@ -115,11 +115,11 @@ data = -[(93+94+92+94)/4 , 92;
 
 data1 = 0.011 *exp(-0.07 * data)
 data2 = 0.0186*exp(-0.068 * data)
-data3 = 0.005*exp(-0.068 * -88)
+data3 = 0.006*exp(-0.068 * data)
 
 % data = data3;
-data = data3;
-% data = data_real;    
+% data = data3;
+data = data_real;    
 
 data(1,:) = [2,2];   % distancias iniciales
 data(2,:) = [2.5,2.5];   % distancias iniciales
@@ -617,7 +617,7 @@ n_data = 1;
                           end
 %                           n_data
 %                           uIdx
-                          pause
+%                           pause
                       end
                                                                   
                       
@@ -646,7 +646,7 @@ n_data = 1;
 %                       end
 
                       luk = L(n_data)
-                      pause
+%                       pause
 
                       robots(wIdx).beta = acos((luk^2 + dk^2 - dk_1^2)/(2*luk * dk));
                       
@@ -852,8 +852,8 @@ n_data = 1;
                       %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                       % GRAFICAS DISTANCIA Y VECTORES ESTIMACION
                       %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-                      graficas_vec_3d;
-                      pause
+%                       graficas_vec_3d;
+%                       pause
                       %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
                       

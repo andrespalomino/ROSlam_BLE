@@ -50,6 +50,11 @@ robots(3).position = [-2;    % x
                       0];    % z                  
 
 robots(1).state = 1; %Solo movimiento de 1
+% % robots(1).pos_flip(uIdx,:) = [x_estimado,y_estimado,x_estimado_2,y_estimado_2]
+% robots(1).pos_flip = [0 0 0 0;2 0 2 0;-2 0 -2 0];
+% robots(2).pos_flip = [0 0 0 0;2 0 2 0;-2 0 -2 0];
+% robots(3).pos_flip = [0 0 0 0;2 0 2 0;-2 0 -2 0];
+
 
 for n=1:number_of_robots
     
@@ -180,7 +185,9 @@ movement_command2 = [0.1;   % Distance x
 %     robots(wIdx).EMC_z = [];
 %     robots(wIdx).EMC_v = [];
     robots(wIdx).pos_flip = zeros(number_of_robots,4);
-    robots(wIdx).theta_flip = zeros(number_of_robots,2);
+      
+%     robots(wIdx).theta_flip = zeros(number_of_robots,2);
+    
     if wIdx == 1
         robots(wIdx).state = 1;
     else 
@@ -470,7 +477,7 @@ k_1 = aux_pk_1;
                       dk_1 = v_xy_k_1;
                       %               dk_1 = robots(wIdx).distk_1;
                       %
-                      luk = luk_xy;
+%                       luk = luk_xy
                       
                       robots(wIdx).beta = acos((luk^2 + dk^2 - dk_1^2)/(2*luk * dk));
                       
@@ -895,23 +902,25 @@ k_1 = aux_pk_1;
                   dtz = 0;
                   psi = 0;
                   
-              if round <= 10
+              if round < 10
                   dty = 0.15;
-              elseif round > 10 && round <= 20
+              elseif round >= 10 && round < 20
                   dtx = 0.12;
-              elseif round > 20 && round <= 30
+              elseif round >= 20 && round < 30
                   dty = -0.15;
-              elseif round > 30 && round <= 40
+              elseif round >= 30 && round < 40
                   dty = -0.15;
-              elseif round > 40 && round <= 50
+              elseif round >= 40 && round < 50
                   dtx = -0.12;                 
-              elseif round > 50 && round <= 60
+              elseif round >= 50 && round < 60
                   dtx = -0.12;
-              elseif round > 60 && round <= 70
+              elseif round >= 60 && round < 70
                   dty = 0.15;
-              elseif round > 70 && round <= 80
+              elseif round >= 70 && round < 80
                   dty = 0.15;
               end
+              
+              
               
 %               if round == 12
 %                   results
